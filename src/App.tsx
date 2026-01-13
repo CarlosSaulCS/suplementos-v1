@@ -5,7 +5,8 @@ import { ProductCard } from './components/ProductCard'
 import { CategoryMenu } from './components/CategoryMenu.tsx'
 import { SearchModal } from './components/SearchModal'
 import { AuthModal } from './components/AuthModal'
-import { CartProvider, useCart } from './app/cart'
+import { CartProvider } from './app/cart'
+import { useCart } from './app/useCart'
 import { catalog, type Category } from './app/catalog'
 
 const CATEGORIES: Category[] = [

@@ -9,9 +9,11 @@ type Props = {
 }
 
 export function SearchModal({ open, onClose, onSelectProduct }: Props) {
+  // Using key to reset query state when modal opens
+  const [searchKey, setSearchKey] = useState(0)
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const prevOpenRef = useRef(open)
+  const wasOpen = useRef(false)
 
   const results = query.trim().length > 0
     ? catalog.filter((p) =>
@@ -21,15 +23,17 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
       )
     : []
 
-  // Reset query when modal opens (comparing with previous state)
-  if (open && !prevOpenRef.current) {
-    setQuery('')
-  }
-  prevOpenRef.current = open
-
+  // Reset and focus when modal opens
   useEffect(() => {
+    if (open && !wasOpen.current) {
+      setSearchKey(k => k + 1)
+      setQuery('')
+    }
+    wasOpen.current = open
+    
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100)
+      const timer = setTimeout(() => inputRef.current?.focus(), 100)
+      return () => clearTimeout(timer)
     }
   }, [open])
 
@@ -75,6 +79,7 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
+              key={searchKey}
               ref={inputRef}
               type="text"
               value={query}

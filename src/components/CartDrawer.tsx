@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { catalogLookup } from '../app/catalog'
-import { useCart } from '../app/cart'
+import { useCart } from '../app/useCart'
 import { formatMXN } from '../app/money'
 
 type Props = {

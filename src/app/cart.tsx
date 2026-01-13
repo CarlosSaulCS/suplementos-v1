@@ -1,26 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { catalogLookup } from './catalog'
+import { CartContext, type CartState } from './CartContext'
 
 export type CartLine = {
   variantId: string
   qty: number
 }
-
-type CartState = {
-  cartOpen: boolean
-  setCartOpen: (open: boolean) => void
-
-  lines: CartLine[]
-  totalItems: number
-  subtotal: number
-
-  add: (variantId: string, qty?: number) => void
-  remove: (variantId: string) => void
-  setQty: (variantId: string, qty: number) => void
-  clear: () => void
-}
-
-const CartContext = createContext<CartState | null>(null)
 
 const STORAGE_KEY = 'munek.cart.v1'
 
@@ -114,10 +99,4 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   )
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>
-}
-
-export function useCart() {
-  const ctx = useContext(CartContext)
-  if (!ctx) throw new Error('useCart must be used within CartProvider')
-  return ctx
 }
