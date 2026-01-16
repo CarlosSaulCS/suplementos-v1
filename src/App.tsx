@@ -5,6 +5,7 @@ import { ProductCard } from './components/ProductCard'
 import { CategoryMenu } from './components/CategoryMenu.tsx'
 import { SearchModal } from './components/SearchModal'
 import { AuthModal } from './components/AuthModal'
+import { AIAssistant } from './components/AIAssistant'
 import { CartProvider } from './app/cart'
 import { useCart } from './app/useCart'
 import { catalog, type Category } from './app/catalog'
@@ -306,12 +307,15 @@ function AppInner() {
         onClose={() => setAuthOpen(false)}
       />
 
+      {/* AI Assistant */}
+      <AIAssistant />
+
       {/* WhatsApp Button */}
       <a
         href="https://wa.me/521234567890"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition-colors"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition-colors"
         aria-label="Contactar por WhatsApp"
       >
         <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
