@@ -16,6 +16,12 @@ export type ChatResponse = {
 }
 
 export async function sendMessage(messages: Message[]): Promise<string> {
+  // Check if API key is configured
+  if (!GROQ_API_KEY) {
+    console.error('VITE_GROQ_API_KEY not configured')
+    throw new Error('API key not configured. Please set VITE_GROQ_API_KEY environment variable.')
+  }
+
   try {
     const response = await fetch(GROQ_API_URL, {
       method: 'POST',
@@ -32,6 +38,8 @@ export async function sendMessage(messages: Message[]): Promise<string> {
     })
 
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Groq API response error:', response.status, errorText)
       throw new Error(`Groq API error: ${response.status}`)
     }
 

@@ -122,13 +122,66 @@ export function AIAssistant() {
     }
   }, [isOpen])
 
+  // Quick action buttons
+  const quickActions = [
+    { label: '💪 Consejos de ejercicio y rutinas', message: '¿Qué rutina me recomiendas para ganar masa muscular?' },
+    { label: '🥗 Asesoría nutricional', message: '¿Qué suplementos necesito para definir?' },
+    { label: '❓ Resolver cualquier duda', message: '¿Cuál es la diferencia entre whey protein y isolate?' },
+  ]
+
+  const handleQuickAction = async (message: string) => {
+    // Set input and trigger submit
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setIsLoading(true)
+
+    try {
+      const apiMessages: Message[] = [
+        { role: 'system', content: buildSystemPrompt() },
+        { role: 'user', content: message },
+      ]
+
+      const response = await sendMessage(apiMessages)
+      const { cleanContent, actions } = parseActions(response)
+
+      const assistantMessage: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: cleanContent,
+        timestamp: new Date(),
+        actions: actions.length > 0 ? actions : undefined,
+      }
+
+      setMessages(prev => [...prev, assistantMessage])
+    } catch (error) {
+      console.error('Error:', error)
+      const errorMessage = error instanceof Error && error.message.includes('API key')
+        ? 'Error de configuración. Por favor contacta al administrador. 🔧'
+        : 'Lo siento, hubo un error al procesar tu mensaje. Por favor intenta de nuevo. 🙏'
+      setMessages(prev => [...prev, {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: errorMessage,
+        timestamp: new Date(),
+      }])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Welcome message when first opened
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         id: 'welcome',
         role: 'assistant',
-        content: '¡Hola! 👋 Soy **MUÑEK AI**, tu asistente de suplementos y fitness.\n\nPuedo ayudarte a:\n- 🛒 Elegir y agregar productos al carrito\n- 💪 Consejos de ejercicio y rutinas\n- 🥗 Asesoría nutricional\n- ❓ Resolver cualquier duda\n\n¿En qué te puedo ayudar hoy?',
+        content: '¡Hola! 👋 Soy **MUÑEK AI**, tu asistente de suplementos y fitness.\n\nPuedo ayudarte con:',
         timestamp: new Date(),
       }])
     }
@@ -178,10 +231,13 @@ export function AIAssistant() {
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Error:', error)
+      const errorMessage = error instanceof Error && error.message.includes('API key')
+        ? 'Error de configuración. Por favor contacta al administrador. 🔧'
+        : 'Lo siento, hubo un error al procesar tu mensaje. Por favor intenta de nuevo. 🙏'
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: 'Lo siento, hubo un error al procesar tu mensaje. Por favor intenta de nuevo. 🙏',
+        content: errorMessage,
         timestamp: new Date(),
       }])
     } finally {
@@ -305,6 +361,22 @@ export function AIAssistant() {
               </div>
             ))}
             
+            {/* Quick Actions - Only show after welcome message and no other messages */}
+            {messages.length === 1 && messages[0].id === 'welcome' && !isLoading && (
+              <div className="flex flex-col gap-2">
+                {quickActions.map((action, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleQuickAction(action.message)}
+                    className="text-left bg-white hover:bg-accent/5 border border-hairline hover:border-accent/30 rounded-xl px-4 py-3 text-sm transition-all duration-200 hover:shadow-md"
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isLoading && (
               <div className="flex justify-start">
                 <div className="bg-white shadow-sm rounded-2xl rounded-bl-md px-4 py-3">
