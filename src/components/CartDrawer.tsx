@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { catalogLookup } from '../app/catalog'
 import { useCart } from '../app/useCart'
 import { formatMXN } from '../app/money'
@@ -98,10 +99,7 @@ export function CartDrawer({ open, onClose }: Props) {
                   >
                     {/* Product color swatch */}
                     <div
-                      className="w-20 h-20 rounded-lg shrink-0"
-                      style={{
-                        background: `linear-gradient(135deg, ${l.product.image.a}, ${l.product.image.b})`,
-                      }}
+                      className="w-20 h-20 rounded-lg shrink-0 bg-linear-to-br from-gray-200 to-gray-50"
                     />
 
                     <div className="flex-1 min-w-0">
@@ -183,13 +181,13 @@ export function CartDrawer({ open, onClose }: Props) {
               <p className="text-xs text-muted mb-4">
                 Envío calculado al finalizar la compra
               </p>
-              <button
-                type="button"
-                className="w-full bg-fg text-white font-semibold py-4 rounded-lg hover:bg-fg/90 transition-colors tracking-wide"
-                onClick={() => alert('Checkout: conecta Stripe/MercadoPago aquí.')}
+              <Link
+                to="/checkout"
+                onClick={onClose}
+                className="w-full bg-fg text-white font-semibold py-4 rounded-lg hover:bg-fg/90 transition-colors tracking-wide text-center block"
               >
                 FINALIZAR COMPRA
-              </button>
+              </Link>
               <button
                 type="button"
                 onClick={() => cart.clear()}

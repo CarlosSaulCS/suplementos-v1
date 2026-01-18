@@ -4,9 +4,7 @@ import { Navbar } from '../components/Navbar'
 import { ProductCard } from '../components/ProductCard'
 import { CategoryMenu } from '../components/CategoryMenu'
 import { SearchModal } from '../components/SearchModal'
-import { AIAssistant } from '../components/AIAssistant'
 import { useCart } from '../app/useCart'
-import { useAuth } from '../app/useAuth'
 import { catalog, type Category } from '../app/catalog'
 
 const CATEGORIES: Category[] = [
@@ -22,7 +20,6 @@ export function HomePage() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState<Category | null>(null)
   const cart = useCart()
-  const { user } = useAuth()
 
   const filtered = useMemo(() => {
     if (!activeCategory) return catalog
@@ -36,7 +33,6 @@ export function HomePage() {
         onOpenCart={() => cart.setCartOpen(true)}
         onOpenMenu={() => setMenuOpen(true)}
         onOpenSearch={() => setSearchOpen(true)}
-        user={user}
       />
 
       <CategoryMenu
@@ -300,9 +296,6 @@ export function HomePage() {
           }, 100)
         }}
       />
-
-      {/* AI Assistant */}
-      <AIAssistant />
 
       {/* WhatsApp Button */}
       <a

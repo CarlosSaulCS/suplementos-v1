@@ -1,17 +1,13 @@
 import { Link } from 'react-router-dom'
-import type { User } from '../app/AuthContext'
 
 type Props = {
   cartCount: number
   onOpenCart: () => void
   onOpenMenu: () => void
   onOpenSearch: () => void
-  user?: User | null
 }
 
-export function Navbar({ cartCount, onOpenCart, onOpenMenu, onOpenSearch, user }: Props) {
-  const dashboardLink = user?.role === 'admin' ? '/admin' : '/dashboard'
-  
+export function Navbar({ cartCount, onOpenCart, onOpenMenu, onOpenSearch }: Props) {
   return (
     <header className="sticky top-0 z-40 bg-fg/95 backdrop-blur-md text-white">
       <div className="max-w-7xl mx-auto px-6">
@@ -59,31 +55,6 @@ export function Navbar({ cartCount, onOpenCart, onOpenMenu, onOpenSearch, user }
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
-            
-            {user ? (
-              <Link
-                to={dashboardLink}
-                className="flex items-center gap-2 hover:opacity-70 transition-opacity p-1"
-                title={user.name}
-              >
-                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-sm font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="hidden md:block text-sm font-medium max-w-[100px] truncate">
-                  {user.name.split(' ')[0]}
-                </span>
-              </Link>
-            ) : (
-              <Link
-                to="/auth"
-                className="hover:opacity-70 transition-opacity p-1 hidden sm:block"
-                aria-label="Mi cuenta"
-              >
-                <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </Link>
-            )}
 
             <button
               type="button"

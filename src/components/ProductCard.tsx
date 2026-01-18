@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { Product } from '../app/catalog'
 import { formatMXN } from '../app/money'
 
@@ -32,42 +33,41 @@ export function ProductCard({ product, onAdd }: Props) {
       className="group bg-white rounded-2xl overflow-hidden border border-hairline hover:shadow-lg transition-all duration-300"
     >
       {/* Image area with gradient */}
-      <div className="relative aspect-square bg-linear-to-br from-gray-100 to-gray-50 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-90"
-          style={{
-            background: `linear-gradient(135deg, ${product.image.a} 0%, ${product.image.b} 100%)`,
-          }}
-        />
-        
-        {/* Category badge */}
-        <div className="absolute top-4 left-4">
-          <span className="inline-block bg-white/90 backdrop-blur text-fg text-xs font-medium px-3 py-1.5 rounded-full">
-            {product.category}
-          </span>
-        </div>
-
-        {/* Discount badge if applicable */}
-        {hit?.compareAt && (
-          <div className="absolute top-4 right-4">
-            <span className="inline-block bg-accent text-white text-xs font-bold px-2 py-1 rounded">
-              -{Math.round((1 - hit.price / hit.compareAt) * 100)}%
+      <Link to={`/producto/${product.id}`} className="block">
+        <div className="relative aspect-square bg-linear-to-br from-gray-100 to-gray-50 overflow-hidden">
+          <div className="absolute inset-0 opacity-90 bg-linear-to-br from-white/60 to-black/10" />
+          
+          {/* Category badge */}
+          <div className="absolute top-4 left-4">
+            <span className="inline-block bg-white/90 backdrop-blur text-fg text-xs font-medium px-3 py-1.5 rounded-full">
+              {product.category}
             </span>
           </div>
-        )}
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-      </div>
+          {/* Discount badge if applicable */}
+          {hit?.compareAt && (
+            <div className="absolute top-4 right-4">
+              <span className="inline-block bg-accent text-white text-xs font-bold px-2 py-1 rounded">
+                -{Math.round((1 - hit.price / hit.compareAt) * 100)}%
+              </span>
+            </div>
+          )}
+
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+        </div>
+      </Link>
 
       {/* Content */}
       <div className="p-5">
         <div className="text-xs text-muted tracking-widest mb-1">
           {product.brand}
         </div>
-        <h3 className="font-semibold text-fg leading-tight mb-2">
-          {product.name}
-        </h3>
+        <Link to={`/producto/${product.id}`}>
+          <h3 className="font-semibold text-fg leading-tight mb-2 hover:text-accent transition-colors">
+            {product.name}
+          </h3>
+        </Link>
         
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-4">

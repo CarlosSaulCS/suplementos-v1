@@ -1,50 +1,22 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './app/cart'
-import { AuthProvider } from './app/AuthContext'
-import { useAuth } from './app/useAuth'
 import { HomePage } from './pages/HomePage'
-import { AuthPage } from './pages/AuthPage'
-import { ClientDashboard } from './pages/ClientDashboard'
-import { AdminDashboard } from './pages/AdminDashboard'
-import { ProtectedRoute } from './components/ProtectedRoute'
-
-function DashboardRedirect() {
-  const { user } = useAuth()
-  if (user?.role === 'admin') {
-    return <Navigate to="/admin" replace />
-  }
-  return <ClientDashboard />
-}
+import { ProductPage } from './pages/ProductPage'
+import { CheckoutPage } from './pages/CheckoutPage'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardRedirect />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            {/* Redirect unknown routes to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </CartProvider>
-      </AuthProvider>
+      <CartProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/producto/:productId" element={<ProductPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          {/* Redirect unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </CartProvider>
     </BrowserRouter>
   )
 }
+

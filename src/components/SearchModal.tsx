@@ -24,8 +24,10 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
   useEffect(() => {
     if (open) {
       // Clear query when opening
-      setQuery('')
-      const timer = setTimeout(() => inputRef.current?.focus(), 100)
+      const timer = setTimeout(() => {
+        setQuery('')
+        inputRef.current?.focus()
+      }, 0)
       return () => clearTimeout(timer)
     }
   }, [open])
@@ -123,8 +125,7 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
                     className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left"
                   >
                     <div
-                      className="w-14 h-14 rounded-lg shrink-0 bg-gradient-to-br"
-                      style={{ backgroundImage: `linear-gradient(135deg, ${product.image.a}, ${product.image.b})` }}
+                      className="w-14 h-14 rounded-lg shrink-0 bg-linear-to-br from-gray-200 to-gray-50"
                       aria-hidden="true"
                     />
                     <div className="flex-1 min-w-0">
