@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../app/AuthContext'
+import { useAuth } from '../app/useAuth'
 
 type AuthMode = 'login' | 'register'
 
@@ -55,7 +55,7 @@ export function AuthPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
-          <img src="/logo.png" alt="MUÑEK" className="h-12 w-12 object-contain" />
+          <img src="/splementos.png" alt="MUÑEK" className="h-12 w-12 object-contain" />
           <div className="flex flex-col">
             <span className="text-xl font-bold tracking-tight text-fg">MUÑEK</span>
             <span className="text-[10px] tracking-[0.2em] text-accent font-medium">SUPLEMENTOS</span>

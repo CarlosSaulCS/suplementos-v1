@@ -1,6 +1,6 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, useMemo, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../app/AuthContext'
+import { useAuth } from '../app/useAuth'
 import { catalog, type Product } from '../app/catalog'
 import { getOrders, updateOrderStatus, getStatusLabel, getStatusColor, type Order, type OrderStatus } from '../app/orders'
 import { formatMXN } from '../app/money'
@@ -54,7 +54,7 @@ export function AdminDashboard() {
       <aside className="w-64 bg-fg text-white flex flex-col fixed h-full">
         <div className="p-6 border-b border-white/10">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="MUÑEK" className="h-10 w-10 object-contain" />
+            <img src="/splementos.png" alt="MUÑEK" className="h-10 w-10 object-contain" />
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight">MUÑEK</span>
               <span className="text-[8px] tracking-[0.15em] text-accent font-medium">ADMIN</span>
@@ -220,6 +220,7 @@ function OrdersTab() {
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value as OrderStatus | 'all')}
+          aria-label="Filtrar por estado"
           className="px-4 py-2 border border-hairline rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-accent/30"
         >
           <option value="all">Todos los estados</option>
@@ -271,6 +272,7 @@ function OrdersTab() {
                     <select
                       value={order.status}
                       onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                      aria-label={`Cambiar estado del pedido ${order.id}`}
                       className={`text-xs font-medium px-2.5 py-1 rounded-full border-0 cursor-pointer ${getStatusColor(order.status)}`}
                     >
                       <option value="pending">Pendiente</option>
@@ -346,6 +348,7 @@ function ProductsTab() {
                     <div 
                       className="w-12 h-12 rounded-lg"
                       style={{ background: `linear-gradient(135deg, ${product.image.a}, ${product.image.b})` }}
+                      aria-hidden="true"
                     />
                     <span className="font-medium text-sm">{product.name}</span>
                   </div>
@@ -362,13 +365,21 @@ function ProductsTab() {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg text-muted hover:text-fg">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button 
+                      className="p-2 hover:bg-gray-100 rounded-lg text-muted hover:text-fg"
+                      title={`Editar ${product.name}`}
+                      aria-label={`Editar ${product.name}`}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </button>
-                    <button className="p-2 hover:bg-red-50 rounded-lg text-muted hover:text-red-600">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button 
+                      className="p-2 hover:bg-red-50 rounded-lg text-muted hover:text-red-600"
+                      title={`Eliminar ${product.name}`}
+                      aria-label={`Eliminar ${product.name}`}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -384,21 +395,26 @@ function ProductsTab() {
 }
 
 function CustomersTab() {
-  const [users, setUsers] = useState<{ id: string; email: string; name: string; role: string; createdAt: Date }[]>([])
-
-  useEffect(() => {
+  // Use useMemo to compute users from localStorage without setState in effect
+  const users = useMemo(() => {
     try {
       const stored = localStorage.getItem('munek.users')
       if (stored) {
         const parsed = JSON.parse(stored)
-        setUsers(parsed.filter((u: { role: string }) => u.role === 'client').map((u: { createdAt: string }) => ({
-          ...u,
-          createdAt: new Date(u.createdAt)
-        })))
+        return parsed
+          .filter((u: { role: string }) => u.role === 'client')
+          .map((u: { id: string; email: string; name: string; role: string; createdAt: string }) => ({
+            id: u.id,
+            email: u.email,
+            name: u.name,
+            role: u.role,
+            createdAt: new Date(u.createdAt)
+          })) as { id: string; email: string; name: string; role: string; createdAt: Date }[]
       }
     } catch {
       // ignore
     }
+    return [] as { id: string; email: string; name: string; role: string; createdAt: Date }[]
   }, [])
 
   const orders = getOrders()

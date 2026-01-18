@@ -1,34 +1,9 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { useState, useSyncExternalStore, type ReactNode } from 'react'
+import { AuthContext, type User, type RegisterData } from './authTypes'
 
-export type UserRole = 'admin' | 'client'
-
-export type User = {
-  id: string
-  email: string
-  name: string
-  role: UserRole
-  phone?: string
-  address?: string
-  createdAt: Date
-}
-
-type AuthContextType = {
-  user: User | null
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>
-  logout: () => void
-  updateProfile: (data: Partial<User>) => void
-}
-
-type RegisterData = {
-  email: string
-  password: string
-  name: string
-  phone?: string
-}
-
-const AuthContext = createContext<AuthContextType | null>(null)
+// Re-export types for backwards compatibility
+export type { User, UserRole, AuthContextType, RegisterData } from './authTypes'
+export { AuthContext } from './authTypes'
 
 const STORAGE_KEY = 'munek.auth'
 const USERS_KEY = 'munek.users'
@@ -68,26 +43,57 @@ function saveUsers(users: (User & { password: string })[]) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users))
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        setUser({
-          ...parsed,
-          createdAt: new Date(parsed.createdAt),
-        })
+// Helper to read initial user from localStorage
+function getInitialUser(): User | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return {
+        ...parsed,
+        createdAt: new Date(parsed.createdAt),
       }
-    } catch {
-      // ignore
     }
-    setIsLoading(false)
-  }, [])
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+// Storage subscription for useSyncExternalStore
+let listeners: (() => void)[] = []
+function subscribe(callback: () => void) {
+  listeners.push(callback)
+  return () => {
+    listeners = listeners.filter(l => l !== callback)
+  }
+}
+function getSnapshot() {
+  return localStorage.getItem(STORAGE_KEY)
+}
+function emitChange() {
+  listeners.forEach(l => l())
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  // Use useSyncExternalStore to avoid setState in effect
+  const storedUser = useSyncExternalStore(subscribe, getSnapshot, () => null)
+  const [user, setUser] = useState<User | null>(() => getInitialUser())
+  const [isLoading] = useState(false)
+
+  // Sync user state when storage changes
+  const syncUser = (newUser: User | null) => {
+    setUser(newUser)
+    if (newUser) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+    emitChange()
+  }
+  
+  // Keep storedUser reference to track changes
+  void storedUser
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     // Simulate API delay
@@ -111,8 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(foundUser.createdAt),
     }
 
-    setUser(userToStore)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userToStore))
+    syncUser(userToStore)
 
     return { success: true }
   }
@@ -144,23 +149,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Auto login
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = newUser
-    setUser(userWithoutPassword)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithoutPassword))
+    syncUser(userWithoutPassword)
 
     return { success: true }
   }
 
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
+    syncUser(null)
   }
 
   const updateProfile = (data: Partial<User>) => {
     if (!user) return
 
     const updatedUser = { ...user, ...data }
-    setUser(updatedUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser))
+    syncUser(updatedUser)
 
     // Also update in users list
     const users = getStoredUsers()
@@ -176,12 +178,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }

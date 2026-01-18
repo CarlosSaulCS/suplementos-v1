@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './app/cart'
-import { AuthProvider, useAuth } from './app/AuthContext'
+import { AuthProvider } from './app/AuthContext'
+import { useAuth } from './app/useAuth'
 import { HomePage } from './pages/HomePage'
 import { AuthPage } from './pages/AuthPage'
 import { ClientDashboard } from './pages/ClientDashboard'

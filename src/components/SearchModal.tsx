@@ -9,11 +9,8 @@ type Props = {
 }
 
 export function SearchModal({ open, onClose, onSelectProduct }: Props) {
-  // Using key to reset query state when modal opens
-  const [searchKey, setSearchKey] = useState(0)
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const wasOpen = useRef(false)
 
   const results = query.trim().length > 0
     ? catalog.filter((p) =>
@@ -23,31 +20,36 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
       )
     : []
 
-  // Reset and focus when modal opens
+  // Reset query and focus input when modal opens
   useEffect(() => {
-    if (open && !wasOpen.current) {
-      setSearchKey(k => k + 1)
-      setQuery('')
-    }
-    wasOpen.current = open
-    
     if (open) {
+      // Clear query when opening
+      setQuery('')
       const timer = setTimeout(() => inputRef.current?.focus(), 100)
       return () => clearTimeout(timer)
     }
   }, [open])
+  
+  // Clear query when closing
+  const handleClose = () => {
+    setQuery('')
+    onClose()
+  }
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) onClose()
+    const onEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        setQuery('')
+        onClose()
+      }
     }
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
+    window.addEventListener('keydown', onEscape)
+    return () => window.removeEventListener('keydown', onEscape)
   }, [open, onClose])
 
   const handleSelect = (product: Product) => {
     onSelectProduct(product.id)
-    onClose()
+    handleClose()
   }
 
   return (
@@ -58,8 +60,8 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
           'fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ' +
           (open ? 'opacity-100' : 'pointer-events-none opacity-0')
         }
-        onClick={onClose}
-        onKeyDown={(e) => e.key === 'Escape' && onClose()}
+        onClick={handleClose}
+        onKeyDown={(e) => e.key === 'Escape' && handleClose()}
         role="button"
         tabIndex={open ? 0 : -1}
         aria-label="Cerrar búsqueda"
@@ -79,7 +81,6 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
-              key={searchKey}
               ref={inputRef}
               type="text"
               value={query}
@@ -89,7 +90,7 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
             />
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="text-xs text-muted hover:text-fg px-2 py-1 rounded bg-gray-100"
             >
               ESC
@@ -122,10 +123,9 @@ export function SearchModal({ open, onClose, onSelectProduct }: Props) {
                     className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left"
                   >
                     <div
-                      className="w-14 h-14 rounded-lg shrink-0"
-                      style={{
-                        background: `linear-gradient(135deg, ${product.image.a}, ${product.image.b})`,
-                      }}
+                      className="w-14 h-14 rounded-lg shrink-0 bg-gradient-to-br"
+                      style={{ backgroundImage: `linear-gradient(135deg, ${product.image.a}, ${product.image.b})` }}
+                      aria-hidden="true"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted">{product.brand}</p>

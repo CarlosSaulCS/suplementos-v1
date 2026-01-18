@@ -6,7 +6,7 @@ import { CategoryMenu } from '../components/CategoryMenu'
 import { SearchModal } from '../components/SearchModal'
 import { AIAssistant } from '../components/AIAssistant'
 import { useCart } from '../app/useCart'
-import { useAuth } from '../app/AuthContext'
+import { useAuth } from '../app/useAuth'
 import { catalog, type Category } from '../app/catalog'
 
 const CATEGORIES: Category[] = [

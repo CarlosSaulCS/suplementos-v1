@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../app/AuthContext'
+import { useAuth } from '../app/useAuth'
 import { getOrdersByUser, getStatusLabel, getStatusColor, type Order } from '../app/orders'
 import { formatMXN } from '../app/money'
 
@@ -26,7 +26,7 @@ export function ClientDashboard() {
       <header className="bg-white border-b border-hairline sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="MUÑEK" className="h-10 w-10 object-contain" />
+            <img src="/splementos.png" alt="MUÑEK" className="h-10 w-10 object-contain" />
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight text-fg">MUÑEK</span>
               <span className="text-[8px] tracking-[0.15em] text-accent font-medium">SUPLEMENTOS</span>
@@ -189,8 +189,13 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
               })}
             </p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-gray-100 rounded-lg"
+            title="Cerrar"
+            aria-label="Cerrar detalle del pedido"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
