@@ -173,8 +173,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const deleteAccount = () => {
+    if (!user) return
+    
+    // Remove user from users list
+    const users = getStoredUsers()
+    const filtered = users.filter(u => u.id !== user.id)
+    saveUsers(filtered)
+    
+    // Logout
+    syncUser(null)
+  }
+
+  const deleteUser = (userId: string): boolean => {
+    // Only admin can delete users
+    if (!user || user.role !== 'admin') return false
+    
+    // Can't delete admin
+    if (userId === 'admin-001') return false
+    
+    const users = getStoredUsers()
+    const filtered = users.filter(u => u.id !== userId)
+    
+    if (filtered.length === users.length) return false // User not found
+    
+    saveUsers(filtered)
+    return true
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile, deleteAccount, deleteUser }}>
       {children}
     </AuthContext.Provider>
   )

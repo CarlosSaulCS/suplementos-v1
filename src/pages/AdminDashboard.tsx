@@ -395,7 +395,10 @@ function ProductsTab() {
 }
 
 function CustomersTab() {
-  // Use useMemo to compute users from localStorage without setState in effect
+  const { deleteUser } = useAuth()
+  const [refreshKey, setRefreshKey] = useState(0)
+  
+  // Use useMemo to compute users from localStorage
   const users = useMemo(() => {
     try {
       const stored = localStorage.getItem('munek.users')
@@ -415,9 +418,19 @@ function CustomersTab() {
       // ignore
     }
     return [] as { id: string; email: string; name: string; role: string; createdAt: Date }[]
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey])
 
   const orders = getOrders()
+
+  const handleDeleteUser = (userId: string, userName: string) => {
+    if (confirm(`¿Estás seguro de eliminar a "${userName}"? Esta acción no se puede deshacer.`)) {
+      const success = deleteUser(userId)
+      if (success) {
+        setRefreshKey(k => k + 1)
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -437,6 +450,7 @@ function CustomersTab() {
                 <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider px-6 py-4">Registrado</th>
                 <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider px-6 py-4">Pedidos</th>
                 <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider px-6 py-4">Total gastado</th>
+                <th className="text-right text-xs font-semibold text-muted uppercase tracking-wider px-6 py-4">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
@@ -463,6 +477,18 @@ function CustomersTab() {
                     </td>
                     <td className="px-6 py-4 text-sm">{userOrders.length}</td>
                     <td className="px-6 py-4 font-semibold">{formatMXN(totalSpent)}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDeleteUser(user.id, user.name)}
+                        className="p-2 hover:bg-red-50 rounded-lg text-muted hover:text-red-600 transition-colors"
+                        title={`Eliminar ${user.name}`}
+                        aria-label={`Eliminar ${user.name}`}
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </td>
                   </tr>
                 )
               })}

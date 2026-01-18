@@ -8,7 +8,7 @@ type Tab = 'orders' | 'profile'
 
 export function ClientDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('orders')
-  const { user, logout, updateProfile } = useAuth()
+  const { user, logout, updateProfile, deleteAccount } = useAuth()
   const navigate = useNavigate()
 
   const orders = user ? getOrdersByUser(user.id) : []
@@ -16,6 +16,13 @@ export function ClientDashboard() {
   const handleLogout = () => {
     logout()
     navigate('/')
+  }
+
+  const handleDeleteAccount = () => {
+    if (confirm('¿Estás seguro de eliminar tu cuenta? Se borrarán todos tus datos permanentemente. Esta acción no se puede deshacer.')) {
+      deleteAccount()
+      navigate('/')
+    }
   }
 
   if (!user) return null
@@ -80,7 +87,7 @@ export function ClientDashboard() {
 
         {/* Content */}
         {activeTab === 'orders' && <OrdersTab orders={orders} />}
-        {activeTab === 'profile' && <ProfileTab user={user} updateProfile={updateProfile} />}
+        {activeTab === 'profile' && <ProfileTab user={user} updateProfile={updateProfile} onDeleteAccount={handleDeleteAccount} />}
       </div>
     </div>
   )
@@ -256,7 +263,11 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   )
 }
 
-function ProfileTab({ user, updateProfile }: { user: NonNullable<ReturnType<typeof useAuth>['user']>; updateProfile: (data: Partial<typeof user>) => void }) {
+function ProfileTab({ user, updateProfile, onDeleteAccount }: { 
+  user: NonNullable<ReturnType<typeof useAuth>['user']>
+  updateProfile: (data: Partial<typeof user>) => void
+  onDeleteAccount: () => void 
+}) {
   const [name, setName] = useState(user.name)
   const [phone, setPhone] = useState(user.phone || '')
   const [address, setAddress] = useState(user.address || '')
@@ -348,6 +359,21 @@ function ProfileTab({ user, updateProfile }: { user: NonNullable<ReturnType<type
         <p className="text-sm text-muted">
           Miembro desde: {user.createdAt.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
         </p>
+      </div>
+
+      {/* Danger zone */}
+      <div className="mt-8 pt-6 border-t border-red-200">
+        <h3 className="font-semibold text-red-600 mb-2">Zona de peligro</h3>
+        <p className="text-sm text-muted mb-4">
+          Al eliminar tu cuenta, se borrarán permanentemente todos tus datos. Esta acción no se puede deshacer.
+        </p>
+        <button
+          type="button"
+          onClick={onDeleteAccount}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+        >
+          Eliminar mi cuenta
+        </button>
       </div>
     </div>
   )

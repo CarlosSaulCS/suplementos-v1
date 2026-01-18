@@ -19,6 +19,8 @@ export type AuthContextType = {
   register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   updateProfile: (data: Partial<User>) => void
+  deleteAccount: () => void
+  deleteUser: (userId: string) => boolean
 }
 
 export type RegisterData = {
